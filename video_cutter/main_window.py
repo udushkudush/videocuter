@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'C:\DEV\projects\videocuter\video_cutter\UI_main.ui',
 # licensing of 'C:\DEV\projects\videocuter\video_cutter\UI_main.ui' applies.
 #
-# Created: Fri Feb 15 00:26:02 2019
+# Created: Sat Feb 16 21:54:05 2019
 #      by: pyside2-uic  running on PySide2 5.12.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -14,20 +14,25 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(471, 325)
+        MainWindow.setAcceptDrops(True)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setAcceptDrops(False)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.input_path = QtWidgets.QLineEdit(self.centralwidget)
+        self.input_path.setAcceptDrops(False)
         self.input_path.setObjectName("input_path")
         self.horizontalLayout.addWidget(self.input_path)
         self.btn_browse = QtWidgets.QPushButton(self.centralwidget)
         self.btn_browse.setObjectName("btn_browse")
         self.horizontalLayout.addWidget(self.btn_browse)
+        self.horizontalLayout.setStretch(0, 3)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.output_info = QtWidgets.QListWidget(self.centralwidget)
+        self.output_info = QtWidgets.QTextEdit(self.centralwidget)
+        self.output_info.setAcceptDrops(False)
         self.output_info.setObjectName("output_info")
         self.verticalLayout.addWidget(self.output_info)
         self.btn_execute = QtWidgets.QPushButton(self.centralwidget)
@@ -45,5 +50,5 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "MainWindow", None, -1))
         self.btn_browse.setText(QtWidgets.QApplication.translate("MainWindow", "...", None, -1))
-        self.btn_execute.setText(QtWidgets.QApplication.translate("MainWindow", "PushButton", None, -1))
+        self.btn_execute.setText(QtWidgets.QApplication.translate("MainWindow", "Cut video", None, -1))
 

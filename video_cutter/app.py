@@ -1,6 +1,9 @@
 import os
+import subprocess
 from os.path import join, split, dirname, normpath
 import re
+import glob
+import json
 from PySide2 import QtCore, QtGui, QtWidgets
 from video_cutter.main_window import Ui_MainWindow
 
@@ -12,11 +15,53 @@ class VideoCutter(QtWidgets.QMainWindow):
         super(VideoCutter, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        # self.setAcceptDrops(True)
 
-    def video_cutter(self):
+    # def dragEnterEvent(self, event:QtGui.QDragEnterEvent):
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            print('ignore event')
+            event.ignore()
+
+    def dropEvent(self, event):
+        for url in event.mimeData().urls():
+            path = url.toLocalFile()
+            if os.path.isfile(path):
+                _dir, _file = split(path)
+                if _file.endswith(".mp4"):
+                    print('path: {} | file: {}'.format(_dir, _file))
+                    self.analyze_video(_dir, _file)
+                else:
+                    print('path: {} | drop video: {}'.format(_dir, _file))
+
+    def analyze_video(self, _dir, _file):
+        mask = join(_dir, '*.EDL')
+        files = glob.glob(mask)
+        # for f in files:
+        #     print(f)
+        _pth = normpath(join(_dir, _file))
+        _out = normpath(join(_dir, 'info.log'))
+        self.ui.input_path.setText(_pth)
+        cmd = 'ffprobe -i {} -v quiet -print_format json -show_format -hide_banner > {}'.format(_pth, _out)
+        os.system(cmd)
+        data = ''
+        text = ''
+        with open(_out, 'r') as f:
+            data = json.load(f)
+        for d in data.keys():
+            c = data[d]
+            for i in c.keys():
+                if i != 'tags':
+                    text += '>> {}\t: {}\n\r'.format(i, c[i])
+                    # print('>> {}\t: {}'.format(i, c[i]))
+        self.ui.output_info.setText(text)
+
+    def video_cutter(self, video, info):
         root_dir = join(split(dirname(__file__))[0])
-        _edl = normpath(join(root_dir, 'data', 'Alisa.EDL'))
-        my_clip = normpath(join(root_dir, 'data', 'sample.mp4'))
+        _edl = normpath(join(root_dir, 'data', info))
+        my_clip = normpath(join(root_dir, 'data', video))
         _output = ""
 
         template = r"(\d{2}:\d{2}:\d{2}:\d{2})\s(\d{2}:\d{2}:\d{2}:\d{2})\n"

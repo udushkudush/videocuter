@@ -10,15 +10,25 @@
     <height>325</height>
    </rect>
   </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="acceptDrops">
+    <bool>false</bool>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="3,0">
       <item>
-       <widget class="QLineEdit" name="input_path"/>
+       <widget class="QLineEdit" name="input_path">
+        <property name="acceptDrops">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="btn_browse">
@@ -30,7 +40,11 @@
      </layout>
     </item>
     <item>
-     <widget class="QListWidget" name="output_info"/>
+     <widget class="QTextEdit" name="output_info">
+      <property name="acceptDrops">
+       <bool>false</bool>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="QPushButton" name="btn_execute">
@@ -41,7 +55,7 @@
        </size>
       </property>
       <property name="text">
-       <string>PushButton</string>
+       <string>Cut video</string>
       </property>
      </widget>
     </item>
