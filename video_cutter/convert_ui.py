@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pyside2uic as pui
 from os.path import normpath, dirname, join
 

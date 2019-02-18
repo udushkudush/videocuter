@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
-import subprocess
 from os.path import join, split, dirname, normpath
 import re
-import glob
 import datetime
 import json
 from PySide2 import QtCore, QtGui, QtWidgets
@@ -13,20 +11,19 @@ os.environ['PATH'] += normpath(join(split(dirname(__file__))[0], 'ffmpeg_4.1', '
 if not os.getenv('SHOTS'):
     os.environ['SHOTS'] = normpath(join(split(dirname(__file__))[0], 'output'))
 
-main_icon = QtGui.QPixmap(normpath(join(dirname(__file__), 'video-editing.png')))
 
 class VideoCutter(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(VideoCutter, self).__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        # main_icon = QtGui.QPixmap(normpath(join(dirname(__file__), 'video-editing.png')))
+        # self.setWindowIcon(main_icon.scaledToHeight(32, QtCore.Qt.SmoothTransformation))
         self.ui.output_path.setPlaceholderText(os.getenv('SHOTS'))
-        # self.setAcceptDrops(True)
         self.video_information = None
         self.ui.btn_execute.setEnabled(False)
         self.ui.btn_execute.clicked.connect(self.cut_thish_shit)
 
-    # def dragEnterEvent(self, event:QtGui.QDragEnterEvent):
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.accept()
@@ -111,34 +108,6 @@ class VideoCutter(QtWidgets.QMainWindow):
                 print('not exists {}'.format(dirname(_output)))
                 os.makedirs(dirname(_output))
             cmd = 'ffmpeg -i {} -ss {} -to {} -c copy {}'.format(video, x[0], x[1], _output)
-            os.system(cmd)
-            print(cmd)
-
-            cmd = 'ffmpeg -i {} -vn -acodec copy {}'.format(_output, _audio_out)
-            os.system(cmd)
-            print(cmd)
-
-
-    def video_cutter(self, video, info):
-        root_dir = join(split(dirname(__file__))[0])
-        _edl = normpath(join(root_dir, 'data', info))
-        my_clip = normpath(join(root_dir, 'data', video))
-        _output = ""
-
-        template = r"(\d{2}:\d{2}:\d{2}:\d{2})\s(\d{2}:\d{2}:\d{2}:\d{2})\n"
-        with open(_edl, 'r') as f:
-            _edl_data = re.findall(template, f.read())
-
-        for x, t in enumerate(_edl_data):
-            _output = normpath(join(root_dir, 'output', 'out_clip_{:03d}.mp4'.format(x)))
-            _audio_out = normpath(join(root_dir, 'output', 'out_clip_{:03d}.m4a'.format(x)))
-            if not os.path.exists(dirname(_output)):
-                print('not exists {}'.format(dirname(_output)))
-                os.makedirs(dirname(_output))
-
-            xx = ('.'.join(t[0].rsplit(':', 1)), '.'.join(t[1].rsplit(':', 1)))
-
-            cmd = 'ffmpeg -i {} -ss {} -t {} -c copy {}'.format(my_clip, xx[0], xx[1], _output)
             os.system(cmd)
             print(cmd)
 
