@@ -106,3 +106,6 @@ venv.bak/
 .mypy_cache/
 
 /data/Animatic_part02.mp4
+/video_cutter/dist/
+/video_cutter/build/
+/video_cutter/ffmpeg/

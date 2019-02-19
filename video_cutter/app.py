@@ -2,12 +2,13 @@
 import os
 from os.path import join, split, dirname, normpath
 import re
+from glob import glob
 import datetime
 import json
 from PySide2 import QtCore, QtGui, QtWidgets
-from video_cutter.main_window import Ui_MainWindow
+from main_window import Ui_MainWindow
 
-os.environ['PATH'] += normpath(join(split(dirname(__file__))[0], 'ffmpeg_4.1', 'bin'))
+os.environ['PATH'] += normpath(join(dirname(__file__), 'ffmpeg'))
 if not os.getenv('SHOTS'):
     os.environ['SHOTS'] = normpath(join(split(dirname(__file__))[0], 'output'))
 
@@ -17,12 +18,14 @@ class VideoCutter(QtWidgets.QMainWindow):
         super(VideoCutter, self).__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        # main_icon = QtGui.QPixmap(normpath(join(dirname(__file__), 'video-editing.png')))
-        # self.setWindowIcon(main_icon.scaledToHeight(32, QtCore.Qt.SmoothTransformation))
+        main_icon = QtGui.QPixmap(normpath(join(dirname(__file__), 'video-editing.png')))
+        self.setWindowIcon(main_icon.scaledToHeight(32, QtCore.Qt.SmoothTransformation))
         self.ui.output_path.setPlaceholderText(os.getenv('SHOTS'))
         self.video_information = None
         self.ui.btn_execute.setEnabled(False)
         self.ui.btn_execute.clicked.connect(self.cut_thish_shit)
+        self.ui.btn_in_browse.clicked.connect(lambda x: self.open_file_dialog('input'))
+        self.ui.btn_out_browse.clicked.connect(lambda x: self.open_file_dialog('output'))
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -43,7 +46,12 @@ class VideoCutter(QtWidgets.QMainWindow):
     def analyze_video(self, _dir, _file):
         # путь к файлу который бум резать
         _pth = normpath(join(_dir, _file))
-        _edl = _pth.rsplit('.')[0] + '.EDL'
+
+        saved = os.getcwd()
+        os.chdir(_dir)
+        _edl = normpath(join(_dir, glob('*.EDL')[0]))
+        os.chdir(saved)
+        # _edl = _pth.rsplit('.')[0] + '.EDL'
         _out = normpath(join(_dir, 'info.log'))
         self.ui.input_path.setText(_pth)
         # получаем json об видосе
@@ -93,17 +101,20 @@ class VideoCutter(QtWidgets.QMainWindow):
         with open(logFile, 'w', encoding='utf-8') as f:
             json.dump(self.video_information, f, sort_keys=True, indent=4)
 
-    def cut_thish_shit(self, root_dir=None):
+    def cut_thish_shit(self):
         xx = self.video_information
+
+        root_dir = self.ui.output_path.text()
         if not root_dir:
-            root_dir = join(split(dirname(__file__))[0])
-
+            root_dir = self.ui.output_path.placeholderText()
         video = self.ui.input_path.text()
-
+        template = re.compile('(part\d{2})')
+        part_n = template.findall(split(video)[-1])[0]
+        print(part_n, root_dir)
         for n, x in enumerate(xx.get('time_code')):
             n += 1
-            _output = normpath(join(root_dir, 'output', 'out_clip_{:03d}.mp4'.format(n)))
-            _audio_out = normpath(join(root_dir, 'output', 'out_audio_{:03d}.m4a'.format(n)))
+            _output = normpath(join(root_dir, '{}_sc{:02d}.mp4'.format(part_n, n)))
+            _audio_out = normpath(join(root_dir, '{}_sc{:02d}.m4a'.format(part_n, n)))
             if not os.path.exists(dirname(_output)):
                 print('not exists {}'.format(dirname(_output)))
                 os.makedirs(dirname(_output))
@@ -114,6 +125,21 @@ class VideoCutter(QtWidgets.QMainWindow):
             cmd = 'ffmpeg -i {} -vn -acodec copy {}'.format(_output, _audio_out)
             os.system(cmd)
             print(cmd)
+
+    def open_file_dialog(self, field):
+        filter = 'Mp4 files (*.mp4)'
+        dialog = QtWidgets.QFileDialog
+        if field == 'input':
+            path, __ = dialog.getOpenFileName(self, 'Choose your video', os.getcwd(), filter)
+            print(path, ">> ", __)
+            _dir, _file = split(path)
+            self.analyze_video(_dir, _file)
+            x = self.ui.input_path
+        else:
+            path = dialog.getExistingDirectory(self, 'Choose your destiny')
+            x = self.ui.output_path
+
+        x.setText(path)
 
 
 if __name__ == '__main__':
